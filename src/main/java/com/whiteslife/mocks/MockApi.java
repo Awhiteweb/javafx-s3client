@@ -6,6 +6,16 @@ import java.util.Arrays;
 import java.util.List;
 
 public class MockApi {
+    private MockApi() {
+    }
+
+    public static MockApi instance() {
+        return ThreadSafeInitialiser.instance;
+    }
+    private static class ThreadSafeInitialiser {
+        private static final MockApi instance = new MockApi();
+    }
+
     private final List<String> nameList = Arrays.asList(
             "Ali Haley",
             "Kevin Potter",
