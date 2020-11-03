@@ -1,6 +1,6 @@
 package com.whiteslife.mocks;
 
-import com.whiteslife.rx.observables.TestObs;
+import io.reactivex.rxjava3.core.Observable;
 
 import java.util.Arrays;
 import java.util.List;
@@ -46,21 +46,20 @@ public class MockApi {
             "Aneesha Noble"
     );
 
-    public MockResponse request(String startAfter) {
+    public Observable<MockResponse> request( String startAfter) {
         long sleepDuration = (long) ( Math.random() * 1000 );
         try {
-            System.out.printf( "requesting from %s%n", startAfter );
             Thread.sleep( sleepDuration );
         }
         catch( Exception e ) {
             e.printStackTrace();
         }
         int max = 5;
-        int last = startAfter == null ? max : nameList.indexOf( startAfter ) + max;
+        int last = startAfter == null ? max : nameList.indexOf( startAfter ) + max + 1;
         System.out.printf( "last item is %s%n", last );
         if( last > nameList.size() ) {
-            return new MockResponse( null, nameList.subList( last - max, nameList.size() - 1 ), false );
+            return Observable.just(new MockResponse( null, nameList.subList( last - max, nameList.size() - 1 ), false ));
         }
-        return new MockResponse( nameList.get( last - 1 ), nameList.subList( last - max, last ), true );
+        return Observable.just(new MockResponse( nameList.get( last - 1 ), nameList.subList( last - max, last ), true ));
     }
 }

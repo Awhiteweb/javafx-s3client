@@ -12,7 +12,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-public class TestObs {
+public class TestObservableOne {
     private static final List<String> staticNameList = new LinkedList<>();
 
     public void expandTest( ObservableList<String> observableList ) throws Throwable {
@@ -34,7 +34,7 @@ public class TestObs {
     }
 
     public Observable<MockResponse> observableApi( String startAfter ) {
-        return Observable.just( MockApi.instance().request( startAfter ) );
+        return Observable.defer(() -> MockApi.instance().request( startAfter ) );
     }
 
     public static Observable<MockResponse> expandObjectKeys( MockResponse current, Function<String, Observable<MockResponse>> fn ) throws Throwable {
