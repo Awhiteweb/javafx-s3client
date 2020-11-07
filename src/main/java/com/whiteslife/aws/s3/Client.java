@@ -1,48 +1,31 @@
 package com.whiteslife.aws.s3;
 
-import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.model.Bucket;
-import com.amazonaws.services.s3.model.ListObjectsV2Request;
-import com.amazonaws.services.s3.model.ListObjectsV2Result;
+import com.amazonaws.services.s3.model.MultipartUploadListing;
+import com.amazonaws.services.s3.model.S3ObjectInputStream;
+import io.reactivex.rxjava3.core.Observable;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-public class Client {
-    private AmazonS3Client client;
+public interface Client {
+    Observable<Void> observeAbortMultipartUpload( String bucket, String key, String uploadId );
 
-    public Client() {
+    Observable<Void> observeCompleteMultipartUpload( String bucket, String key, String uploadId );
 
-    }
+    Observable<Void> observeInitiateMultipartUpload( String bucket, String key );
 
-    public List<Bucket> listBuckets() {
-        return this.client.listBuckets();
-    }
+    Observable<Stream<String>> observeBucketStream();
 
-    public S3ObjectList listObjects( String bucket ) {
-        return this.listObjects( bucket, 25 );
-    }
+    Observable<MultipartUploadListing> observeMultipartUploads( String bucket );
 
-    public S3ObjectList listObjects( String bucket, String lastKey ) {
-        return this.listObjects( bucket, 25, lastKey );
-    }
+    Observable<MultipartUploadListing> observeMultipartUploads( String bucket, String keyMarker );
 
-    public S3ObjectList listObjects( String bucket, int maxKeys ) {
-        return this.listObjects( new ListObjectsV2Request()
-                .withBucketName( bucket )
-                .withMaxKeys( maxKeys ) );
+    Observable<S3ObjectInputStream> observeObjectContent( String bucket, String key );
 
-    }
+    Observable<S3ObjectList> observeObjects( String bucket );
 
-    public S3ObjectList listObjects( String bucket, int maxKeys, String lastKey ) {
-        return this.listObjects( new ListObjectsV2Request()
-                .withBucketName( bucket )
-                .withMaxKeys( maxKeys )
-                .withStartAfter( lastKey ) );
-    }
+    Observable<S3ObjectList> observeObjects( String bucket, String startAfter );
 
-    private S3ObjectList listObjects( ListObjectsV2Request request ) {
-        ListObjectsV2Result result = this.client.listObjectsV2( request );
-        return new S3ObjectList( result.getObjectSummaries().stream().map( s -> s.getKey() ).collect( Collectors.toList() ), result.isTruncated() );
-    }
+    Observable<S3ObjectList> observeObjects( String bucket, int maxKeys );
+
+    Observable<S3ObjectList> observeObjects( String bucket, int maxKeys, String startAfter );
 }
