@@ -28,4 +28,8 @@ public interface Client {
     Observable<S3ObjectList> observeObjects( String bucket, int maxKeys );
 
     Observable<S3ObjectList> observeObjects( String bucket, int maxKeys, String startAfter );
+
+    Observable<S3PartList> observeMultipartUploadParts( String bucket, String key, String uploadId );
+
+    Observable<S3PartList> observeMultipartUploadParts( String bucket, String key, String uploadId, int partNumberMarker );
 }

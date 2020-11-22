@@ -98,6 +98,22 @@ public class ObservableS3Client implements Client {
                 .withStartAfter( startAfter ) );
     }
 
+    @Override
+    public Observable<S3PartList> observeMultipartUploadParts( String bucket, String key, String uploadId ) {
+        return this.observeMultipartUploadParts( new ListPartsRequest( bucket, key, uploadId ) );
+    }
+
+    @Override
+    public Observable<S3PartList> observeMultipartUploadParts( String bucket, String key, String uploadId, int partNumberMarker ) {
+        return this.observeMultipartUploadParts( new ListPartsRequest( bucket, key, uploadId ).withPartNumberMarker( partNumberMarker ) );
+    }
+
+    private Observable<S3PartList> observeMultipartUploadParts( ListPartsRequest listPartsRequest ) {
+        PartListing partListing = this.client.listParts(listPartsRequest);
+        Stream<S3Part> partStream = partListing.getParts().stream().map( p -> new S3Part( p.getETag(), p.getSize() ) );
+        return Observable.just( new S3PartList( partStream, partListing.isTruncated(), partListing.getNextPartNumberMarker() ) );
+    }
+
     private Observable<S3ObjectList> observeObjects( ListObjectsV2Request request ) {
         ListObjectsV2Result result = this.client.listObjectsV2( request );
         int total = result.getObjectSummaries().size();

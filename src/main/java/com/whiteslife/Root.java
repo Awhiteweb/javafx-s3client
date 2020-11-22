@@ -4,7 +4,7 @@ import com.amazonaws.regions.Regions;
 import com.whiteslife.aws.s3.ObservableS3Client;
 import com.whiteslife.aws.s3.S3Repository;
 import com.whiteslife.javafx.extensions.BaseGridPane;
-import com.whiteslife.view.models.KeyListModel;
+import com.whiteslife.view.models.ListModel;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
@@ -42,7 +42,7 @@ public class Root extends Application {
         // Lists //
         ///////////
         ListView<String> bucketListView = new ListView<>();
-        ListView<KeyListModel> keyListView = new ListView<>();
+        ListView<ListModel> keyListView = new ListView<>();
 
         /////////////
         // Buttons //
@@ -59,11 +59,11 @@ public class Root extends Application {
         errorMessage.setBorder( new Border( new BorderStroke( Paint.valueOf( "red" ), BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderStroke.THIN ) ) );
         ObservableList<String> observableBucketList = FXCollections.observableList( new LinkedList<>() );
         bucketListView.setItems( observableBucketList );
-        ObservableList<KeyListModel> observableKeyList = FXCollections.observableList( new ArrayList<>() );
+        ObservableList<ListModel> observableKeyList = FXCollections.observableList( new ArrayList<>() );
         keyListView.setItems( observableKeyList );
-        keyListView.setCellFactory( c -> new ListCell<KeyListModel>(){
+        keyListView.setCellFactory( c -> new ListCell<ListModel>(){
             @Override
-            protected void updateItem(KeyListModel item, boolean empty) {
+            protected void updateItem(ListModel item, boolean empty) {
                 super.updateItem( item, empty );
                 if(empty || item == null || item.getDisplayLabel() == null) {
                     setText( null );
@@ -86,7 +86,7 @@ public class Root extends Application {
                 .doOnError( Throwable::printStackTrace )
                 .subscribe() );
         this.compositeDisposable.add( s3Repository.observeKeyStream()
-                .doOnNext( s -> s.forEach( k -> observableKeyList.add( new KeyListModel( k, k ) ) ) )
+                .doOnNext( s -> s.forEach( observableKeyList::add ) )
                 .doOnError( Throwable::printStackTrace )
                 .doOnComplete( () -> getKeysButton.setDisable( false ) )
                 .subscribe() );
@@ -133,7 +133,7 @@ public class Root extends Application {
                 listMultipartUploadsButton.setDisable( true );
                 try {
                     observableKeyList.clear();
-
+                    s3Repository.retrieveMultipartUploadList( selectedBucket );
                 }
                 catch( Throwable throwable ) {
                     throwable.printStackTrace();
